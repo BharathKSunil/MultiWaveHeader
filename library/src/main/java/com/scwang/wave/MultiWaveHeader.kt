@@ -5,6 +5,8 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
+import android.os.Build
+import android.os.Trace
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
@@ -104,7 +106,7 @@ open class MultiWaveHeader @JvmOverloads constructor(context: Context, attrs: At
         updateLinearGradient(w, h)
     }
 
-    override fun dispatchDraw(canvas: Canvas) {
+    override fun onDraw(canvas: Canvas) {
         super.dispatchDraw(canvas)
         if (mltWave.size > 0) {
             mPath?.let {
@@ -114,27 +116,27 @@ open class MultiWaveHeader @JvmOverloads constructor(context: Context, attrs: At
             val thisView: View = this
             val height = thisView.height
             val thisTime = System.currentTimeMillis()
-            for (wave in mltWave) {
+            for (i in 0 until mltWave.size) {
                 mMatrix.reset()
                 canvas.save()
-                if (isRunning && mLastTime > 0 && wave.velocity != 0F) {
-                    var offsetX = wave.offsetX - wave.velocity * velocity * (thisTime - mLastTime) / 1000f
-                    if (-wave.velocity > 0) {
-                        offsetX %= (wave.width / 2).toFloat()
+                if (isRunning && mLastTime > 0 && mltWave[i].velocity != 0F) {
+                    var offsetX = mltWave[i].offsetX - mltWave[i].velocity * velocity * (thisTime - mLastTime) / 1000f
+                    if (-mltWave[i].velocity > 0) {
+                        offsetX %= (mltWave[i].width / 2).toFloat()
                     } else {
                         while (offsetX < 0) {
-                            offsetX += (wave.width / 2).toFloat()
+                            offsetX += (mltWave[i].width / 2).toFloat()
                         }
                     }
-                    wave.offsetX = offsetX
-                    mMatrix.setTranslate(offsetX, (1 - mCurProgress) * height) //wave.offsetX =
-                    canvas.translate(-offsetX, -wave.offsetY - (1 - mCurProgress) * height)
+                    mltWave[i].offsetX = offsetX
+                    mMatrix.setTranslate(offsetX, (1 - mCurProgress) * height) //mltWave[i].offsetX =
+                    canvas.translate(-offsetX, -mltWave[i].offsetY - (1 - mCurProgress) * height)
                 } else {
-                    mMatrix.setTranslate(wave.offsetX, (1 - mCurProgress) * height)
-                    canvas.translate(-wave.offsetX, -wave.offsetY - (1 - mCurProgress) * height)
+                    mMatrix.setTranslate(mltWave[i].offsetX, (1 - mCurProgress) * height)
+                    canvas.translate(-mltWave[i].offsetX, -mltWave[i].offsetY - (1 - mCurProgress) * height)
                 }
                 mPaint.shader.setLocalMatrix(mMatrix)
-                canvas.drawPath(wave.path, mPaint)
+                canvas.drawPath(mltWave[i].path, mPaint)
                 canvas.restore()
             }
             mLastTime = thisTime
